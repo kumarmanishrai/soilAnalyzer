@@ -1,31 +1,44 @@
 /* eslint-disable prettier/prettier */
 import React from 'react';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import {
   View,
   ScrollView,
   Text,
+  Button,
   TouchableOpacity,
   Image,
   StyleSheet,
   StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
+import { clearTokens } from './utils/tokenStorage';
 
-const Home = () => {
+const HomeScreen = ({navigation}) => {
+
+    const handleLogout = async () => {
+      await clearTokens();
+      navigation.replace('Auth', {
+        screen: 'Login',
+      });
+    };
+
   return (
-    <ScrollView style={styles.container}>
+    <SafeAreaView style={{ flex: 1 }}>
+    <View style={styles.container}>
       <StatusBar barStyle="light-content" />
 
        {/* Upper Green Circle Design */}
        <View style={styles.upperCircle1} />
        <View style={styles.upperCircle2} />
 
-
+       <View>
       {/* Header with back button and profile image */}
       <View style={styles.header}>
         <TouchableOpacity style={styles.backButton}>
           <Icon name="menu" size={24} color="#000" />
         </TouchableOpacity>
+        <Button title="Logout" onPress={handleLogout} />
         <Image
           style={styles.profileImage}
           source={{
@@ -35,53 +48,64 @@ const Home = () => {
       </View>
 
       {/* Fields */}
-      <ScrollView style={styles.fieldsContainer}>
-        {['Field1', 'Field2', 'Field3', 'Field4'].map((field, index) => (
-          <View key={index} style={styles.fieldRow}>
+      <ScrollView style={styles.fieldsContainer} contentContainerStyle={{paddingBottom: 20}}>
+        {['Field1', 'Field2', 'Field3', 'Field4', 'Field2', 'Field3', 'Field4', 'Field2', 'Field3', 'Field4', 'Field2', 'Field3', 'Field4', 'Field2', 'Field3', 'Field4'].map((field, index) => (
+          <TouchableOpacity key={index} style={styles.fieldRow}>
             <Text style={styles.fieldText}>{field}</Text>
+            <View style={styles.icons}>
             <TouchableOpacity>
-              <Icon name="edit" size={20} color="#000" />
+              <Icon name="edit" size={20} color="#ff6600" />
             </TouchableOpacity>
-          </View>
+            <TouchableOpacity>
+              <Icon name="delete" size={20} color="#ff6600" />
+            </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
         ))}
 
-            {/* Add Field Button */}
+      </ScrollView>
+           {/* Add Field Button */}
         <TouchableOpacity style={styles.addButton}>
             <Text style={styles.addButtonText}>Add Field</Text>
         </TouchableOpacity>
-      </ScrollView>
+      </View>
+
+      <View>
+        
+      </View>
 
       {/* Lower Green Circle Design */}
       <View style={styles.lowerCircle1} />
       <View style={styles.lowerCircle2} />
 
-    </ScrollView>
+    </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e0e0e0',
+    height: '100%',
   },
   upperCircle2: {
     position: 'absolute',
-    width: 400,
-    height: 400,
+    width: 300,
+    height: 300,
     backgroundColor: '#57cc72',
     borderRadius: 200,
-    top: -140,
-    right:-60,
+    top: -180,
+    right:-80,
     zIndex: -10,
   },
   upperCircle1: {
     position: 'absolute',
-    width: 300,
-    height: 300,
+    width: 200,
+    height: 200,
     backgroundColor: '#a1e89c',
     borderRadius: 150,
-    top: -140,
-    right: 305,
+    top: -100,
+    right: 155,
     zIndex : -11,
   },
   header: {
@@ -109,22 +133,29 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   fieldsContainer: {
-    marginTop: 80,
-    paddingTop: 20,
-    mrginBottom: 40,
+    marginTop: 58,
+    paddingTop: 0,
+    marginBottom: 40,
+    paddingBottom: 240,
     zIndex: 9999,
+    height: '70%',
     paddingHorizontal: 16,
   },
   fieldRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: '#fff',
+    backgroundColor: 'lightgray',
     borderRadius: 10,
     paddingVertical: 12,
     paddingHorizontal: 16,
     marginVertical: 8,
     elevation: 2,
+  },
+  icons : {
+    display: 'flex',
+    flexDirection: 'row',
+    gap: 9.5,
   },
   fieldText: {
     fontSize: 16,
@@ -132,11 +163,11 @@ const styles = StyleSheet.create({
   },
   addButton: {
     backgroundColor: '#ff6600',
-    borderRadius: 20,
+    borderRadius: 6,
     paddingVertical: 12,
     paddingHorizontal: 32,
     alignSelf: 'center',
-    marginTop: 20,
+    bottom: 20,
   },
   addButtonText: {
     color: '#fff',
@@ -151,6 +182,8 @@ const styles = StyleSheet.create({
     borderRadius: 75,
     bottom: 90,
     left: 70,
+    zIndex : -11,
+
   },
   lowerCircle2: {
     position: 'absolute',
@@ -160,7 +193,9 @@ const styles = StyleSheet.create({
     borderRadius: 75,
     bottom: -50,
     left: -50,
+    zIndex : -11,
+
   },
 });
 
-export default Home;
+export default HomeScreen;
