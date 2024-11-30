@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-alert */
-import React, {useState} from 'react';
+import React, {useContext, useState} from 'react';
 import {
   View,
   Text,
@@ -8,40 +8,54 @@ import {
   ScrollView,
   TextInput,
   Button,
+  Alert,
   TouchableOpacity,
 } from 'react-native';
 import axios from 'axios';
 import {getTokens, saveTokens} from './utils/tokenStorage';
+// import { useNavigation } from '@react-navigation/native';
+import Config from 'react-native-config';
+import { AuthContext } from '../App';
 
-const BASE_URL = 'https://soilanalyzerserver.onrender.com';
 
-const PinLogInScreen = ({navigation}) => {
+const PinLogInScreen = () => {
+  const { setIsAuthenticated, setIsPinLogin } = useContext(AuthContext);
+  // const navigation = useNavigation();
   const [pin, setPin] = useState('');
 
   const handlePinLogin = async () => {
     const {passwordToken} = await getTokens();
     console.log(passwordToken);
 
+    if(!pin){
+      Alert.alert('Please enter required information');
+      return;
+    }
+    if (pin.length !== 4) {
+      Alert.alert('PIN must be a 4-digit number.');
+      return;
+    }
+
     if (!passwordToken) {
-      alert('Session expired. Please log in with email and password.');
-      navigation.replace('Main', {
-        screen: 'Home',
-      });
+      Alert.alert('Session expired. Please log in with email and password.');
+      setIsAuthenticated(false);
+      setIsPinLogin(true);
       return;
     }
 
     try {
-      const response = await axios.post(`${BASE_URL}/user/login/pin`, {
+      const response = await axios.post(`${Config.BASE_URL}/user/login/pin`, {
         pin,
         passwordToken,
       });
       if (response.status === 200) {
         const pinToken = response.data.jwtTokenPin;
         await saveTokens(pinToken, passwordToken);
-        navigation.replace('Home');
+        setIsPinLogin(false);
+        setIsAuthenticated(true);
       }
     } catch (error) {
-      alert('Invalid PIN. Please try again.');
+      Alert.alert('Invalid PIN. Please try again.');
     }
   };
 

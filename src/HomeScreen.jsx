@@ -1,6 +1,7 @@
+/* eslint-disable react-native/no-inline-styles */
 /* eslint-disable prettier/prettier */
-import React from 'react';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import React, {useContext, useEffect, useState} from 'react';
+import {SafeAreaView} from 'react-native-safe-area-context';
 import {
   View,
   ScrollView,
@@ -12,80 +13,141 @@ import {
   StatusBar,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import { clearTokens } from './utils/tokenStorage';
+import {clearToken, getTokens} from './utils/tokenStorage';
+import { getUserDetails, saveUserDetails } from './utils/userDetails';
+import {useNavigation} from '@react-navigation/native';
+import {AuthContext} from '../App';
+import { Config } from 'react-native-config';
+import axios from 'axios';
 
-const HomeScreen = ({navigation}) => {
+const HomeScreen = () => {
+  const {setIsAuthenticated, setIsPinLogin} = useContext(AuthContext);
+  const [profileImage, setProfileImage] = useState(null);
 
-    const handleLogout = async () => {
-      await clearTokens();
-      navigation.replace('Auth', {
-        screen: 'Login',
-      });
+  useEffect(() => {
+    const userDetails = async () => {
+      console.log('highlight');
+      const { passwordToken } = await getTokens();
+
+      if(passwordToken) {
+      console.log('highlight2');
+
+        const response = await axios.post(`${Config.BASE_URL}/user/about`, {passwordToken});
+        if(response.status === 200) {
+          console.log('highlight3');
+          console.log(response.data.name);
+          console.log(response.data.email);
+          // console.log(response.data.image);
+          saveUserDetails(response.data);
+        }
+      }
+
+      const {image} = await getUserDetails();
+      setProfileImage(image);
+    };
+    userDetails();
+
+    return () => {
+      userDetails(); // Properly clean up listener
     };
 
+  }, []);
+
+  const navigation = useNavigation();
+
+  const handleLogout = async () => {
+    await clearToken();
+    setIsPinLogin(true);
+    setIsAuthenticated(false);
+  };
+
+  const handleFieldClick = fieldId => {
+    // Navigate to the new screen and pass the fieldId or field data
+    navigation.navigate('FieldDetails');
+  };
+
   return (
-    <SafeAreaView style={{ flex: 1 }}>
-    <View style={styles.container}>
-      <StatusBar barStyle="light-content" />
+    <SafeAreaView style={{flex: 1}}>
+      <View style={styles.container}>
+        <StatusBar barStyle="light-content" />
 
-       {/* Upper Green Circle Design */}
-       <View style={styles.upperCircle1} />
-       <View style={styles.upperCircle2} />
+        {/* Upper Green Circle Design */}
+        <View style={styles.upperCircle1} />
+        <View style={styles.upperCircle2} />
 
-       <View>
-      {/* Header with back button and profile image */}
-      <View style={styles.header}>
-        <TouchableOpacity style={styles.backButton}>
-          <Icon name="menu" size={24} color="#000" />
-        </TouchableOpacity>
-        <Button title="Logout" onPress={handleLogout} />
-        <Image
-          style={styles.profileImage}
-          source={{
-            uri: 'https://lh3.googleusercontent.com/a/ACg8ocLPYnfvUEcoeogYnJMFtNsOsIMm8xr3bZvzIIhJyWpLTq9mJomF=s360-c-no',
-          }} // Replace with actual image source
-        />
-      </View>
-
-      {/* Fields */}
-      <ScrollView style={styles.fieldsContainer} contentContainerStyle={{paddingBottom: 20}}>
-        {['Field1', 'Field2', 'Field3', 'Field4', 'Field2', 'Field3', 'Field4', 'Field2', 'Field3', 'Field4', 'Field2', 'Field3', 'Field4', 'Field2', 'Field3', 'Field4'].map((field, index) => (
-          <TouchableOpacity key={index} style={styles.fieldRow}>
-            <Text style={styles.fieldText}>{field}</Text>
-            <View style={styles.icons}>
-            <TouchableOpacity>
-              <Icon name="edit" size={20} color="#ff6600" />
+        <View>
+          {/* Header with back button and profile image */}
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+              <Image
+                style={styles.profileImage}
+                source={{
+                  uri: profileImage ? profileImage : 'https://lh3.googleusercontent.com/a/ACg8ocLPYnfvUEcoeogYnJMFtNsOsIMm8xr3bZvzIIhJyWpLTq9mJomF=s360-c-no',
+                }} // Replace with actual image source
+              />
             </TouchableOpacity>
-            <TouchableOpacity>
-              <Icon name="delete" size={20} color="#ff6600" />
+            <TouchableOpacity style={styles.backButton} onPress={handleLogout}>
+              <Icon name="logout" size={24} color="#000" />
             </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        ))}
+          </View>
 
-      </ScrollView>
-           {/* Add Field Button */}
-        <TouchableOpacity style={styles.addButton}>
+          {/* Fields */}
+          <ScrollView
+            style={styles.fieldsContainer}
+            contentContainerStyle={{paddingBottom: 20}}>
+            {[
+              'Field1',
+              'Field2',
+              'Field3',
+              'Field4',
+              'Field2',
+              'Field3',
+              'Field4',
+              'Field2',
+              'Field3',
+              'Field4',
+              'Field2',
+              'Field3',
+              'Field4',
+              'Field2',
+              'Field3',
+              'Field4',
+            ].map((field, index) => (
+              <TouchableOpacity
+                key={index}
+                style={styles.fieldRow}
+                onPress={handleFieldClick}>
+                <Text style={styles.fieldText}>{field}</Text>
+                <View style={styles.icons}>
+                  <TouchableOpacity>
+                    <Icon name="edit" size={20} color="#ff6600" />
+                  </TouchableOpacity>
+                  <TouchableOpacity>
+                    <Icon name="delete" size={20} color="#ff6600" />
+                  </TouchableOpacity>
+                </View>
+              </TouchableOpacity>
+            ))}
+          </ScrollView>
+          {/* Add Field Button */}
+          <TouchableOpacity style={styles.addButton}>
             <Text style={styles.addButtonText}>Add Field</Text>
-        </TouchableOpacity>
+          </TouchableOpacity>
+        </View>
+
+        <View></View>
+
+        {/* Lower Green Circle Design */}
+        <View style={styles.lowerCircle1} />
+        <View style={styles.lowerCircle2} />
       </View>
-
-      <View>
-        
-      </View>
-
-      {/* Lower Green Circle Design */}
-      <View style={styles.lowerCircle1} />
-      <View style={styles.lowerCircle2} />
-
-    </View>
     </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1,
+    flexGrow: 1,
     height: '100%',
   },
   upperCircle2: {
@@ -95,8 +157,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#57cc72',
     borderRadius: 200,
     top: -180,
-    right:-80,
+    right: -80,
     zIndex: -10,
+    opacity: 0.5,
+
   },
   upperCircle1: {
     position: 'absolute',
@@ -106,31 +170,34 @@ const styles = StyleSheet.create({
     borderRadius: 150,
     top: -100,
     right: 155,
-    zIndex : -11,
+    zIndex: -11,
+    opacity: 0.5,
+
   },
   header: {
     flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    // backgroundColor: 'blue',
+    padding: 8,
+    // backgroundColor: 'gray',
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 10,
   },
+  profileImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 40,
+    // position: 'absolute',
+    left: 2,
+    top: 2,
+    borderColor: '#fff',
+    borderWidth: 2,
+  },
   backButton: {
-    marginRight: 16,
+    right: 0,
     padding: 8,
     backgroundColor: '#ff6600',
     borderRadius: 50,
-  },
-  profileImage: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    position: 'absolute',
-    right: 16,
-    top: 0,
-    borderColor: '#fff',
-    borderWidth: 2,
   },
   fieldsContainer: {
     marginTop: 58,
@@ -138,7 +205,11 @@ const styles = StyleSheet.create({
     marginBottom: 40,
     paddingBottom: 240,
     zIndex: 9999,
-    height: '70%',
+    marginHorizontal: 'auto',
+    width: '92%',
+    height: '66%',
+    borderRadius: 4,
+    backgroundColor: '#a5c4ad',
     paddingHorizontal: 16,
   },
   fieldRow: {
@@ -152,7 +223,7 @@ const styles = StyleSheet.create({
     marginVertical: 8,
     elevation: 2,
   },
-  icons : {
+  icons: {
     display: 'flex',
     flexDirection: 'row',
     gap: 9.5,
@@ -182,8 +253,8 @@ const styles = StyleSheet.create({
     borderRadius: 75,
     bottom: 90,
     left: 70,
-    zIndex : -11,
-
+    opacity: 0.5,
+    zIndex: -11,
   },
   lowerCircle2: {
     position: 'absolute',
@@ -193,7 +264,8 @@ const styles = StyleSheet.create({
     borderRadius: 75,
     bottom: -50,
     left: -50,
-    zIndex : -11,
+    zIndex: -11,
+    opacity: 0.5,
 
   },
 });

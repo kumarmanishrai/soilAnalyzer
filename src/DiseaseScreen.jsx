@@ -1,9 +1,11 @@
 /* eslint-disable prettier/prettier */
+/* eslint-disable react-native/no-inline-styles */
+
 import React from 'react';
 import { View, Text, StyleSheet} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-const ChatScreen = () => {
+const DiseaseScreen = () => {
   return (
     <SafeAreaView style={{ flex: 1 }}>
     <View style={styles.container}>
@@ -72,4 +74,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChatScreen;
+export default DiseaseScreen;

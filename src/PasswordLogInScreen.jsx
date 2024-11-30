@@ -1,28 +1,41 @@
+/* eslint-disable no-trailing-spaces */
 /* eslint-disable prettier/prettier */
-import React, { useState } from 'react';
-import {View, Text, StyleSheet, ScrollView, Button, TextInput} from 'react-native';
+import React, { useContext, useState } from 'react';
+import {View, Text, StyleSheet,Button, TextInput, Alert} from 'react-native';
 import axios from 'axios';
 import { saveTokens } from './utils/tokenStorage';
+import { useNavigation } from '@react-navigation/native';
+import Config from 'react-native-config';
+import { AuthContext } from '../App';
 
-
-const BASE_URL = 'https://soilanalyzerserver.onrender.com';
-
-const PasswordLogInScreen = ({ navigation }) => {
+const PasswordLogInScreen = () => {
+  const { setIsPinLogin } = useContext(AuthContext);
+  const navigation = useNavigation();
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
     const handleLogin = async () => {
+      if(!email || !password){
+        Alert.alert('Please enter all required information');
+        return;
+      }
+      if (password.length < 8) {
+        Alert.alert('Password minimum length must be 8 characters.');
+        return;
+      }
 
         try {
           console.log(`${email} ${password}`)
-          const response = await axios.post(`${BASE_URL}/user/login`, { email, password });
+          const response = await axios.post(`${Config.BASE_URL}/user/login`, { email, password });
           const passwordToken = response.data.jwtTokenPassword;
           await saveTokens(null, passwordToken);
-          console.log(navigation.getState());
-          navigation.replace('PinLogIn');
+          // console.log(navigation.getState());
+          setIsPinLogin(true);
+          // navigation.replace('PinLogIn');
         } catch (error) {
           console.error('Login failed:', error.message);
+          Alert.alert('Login failed');
         }
       };
 
