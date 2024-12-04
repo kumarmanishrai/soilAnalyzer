@@ -1,33 +1,28 @@
 /* eslint-disable prettier/prettier */
 /* eslint-disable no-alert */
-import React, {useContext, useState} from 'react';
+import React, { useContext, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  ScrollView,
   TextInput,
-  Button,
   Alert,
   TouchableOpacity,
 } from 'react-native';
 import axios from 'axios';
-import {getTokens, saveTokens} from './utils/tokenStorage';
-// import { useNavigation } from '@react-navigation/native';
+import { getTokens, saveTokens } from './utils/tokenStorage';
 import Config from 'react-native-config';
 import { AuthContext } from '../App';
 
-
 const PinLogInScreen = () => {
   const { setIsAuthenticated, setIsPinLogin } = useContext(AuthContext);
-  // const navigation = useNavigation();
   const [pin, setPin] = useState('');
 
   const handlePinLogin = async () => {
-    const {passwordToken} = await getTokens();
+    const { passwordToken } = await getTokens();
     console.log(passwordToken);
 
-    if(!pin){
+    if (!pin) {
       Alert.alert('Please enter required information');
       return;
     }
@@ -61,126 +56,114 @@ const PinLogInScreen = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.upperCircle1} />
-      <View style={styles.upperCircle2} />
-      {/* Add any other content here */}
+      {/* Decorative Circles */}
+      <View style={styles.upperCircleLarge} />
+      <View style={styles.upperCircleSmall} />
+      <View style={styles.lowerCircleLarge} />
+      <View style={styles.lowerCircleSmall} />
 
+      {/* Main Content */}
       <View style={styles.innerContainer}>
-        <Text style={styles.title}>Pin LogIn</Text>
+        <Text style={styles.title}>Secure PIN Login</Text>
         <TextInput
           style={styles.input}
-          placeholder="4-digit PIN"
+          placeholder="Enter 4-digit PIN"
           keyboardType="numeric"
-          placeholderTextColor="#999"
+          placeholderTextColor="#bbb"
           maxLength={4}
           value={pin}
           onChangeText={setPin}
         />
-        {/* <Button title="Login with PIN" onPress={handlePinLogin} /> */}
-        <TouchableOpacity style={styles.button1} onPress={handlePinLogin}>
-          <Text style={styles.buttonText1}>Login with PIN</Text>
+        <TouchableOpacity style={styles.button} onPress={handlePinLogin}>
+          <Text style={styles.buttonText}>Log In</Text>
         </TouchableOpacity>
       </View>
-      {/* Lower Green Circle Design */}
-      <View style={styles.lowerCircle1} />
-      <View style={styles.lowerCircle2} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {flex: 1, backgroundColor: '#e0e0e0'},
-  upperCircle2: {
+  container: { flex: 1, backgroundColor: '#f3f4f6', position: 'relative' },
+  upperCircleLarge: {
     position: 'absolute',
-    width: 300,
-    height: 300,
-    backgroundColor: '#57cc72',
-    borderRadius: 200,
-    top: -180,
-    right: -80,
+    width: 250,
+    height: 250,
+    backgroundColor: '#d0f1db',
+    borderRadius: 125,
+    top: -80,
+    right: -60,
     zIndex: -2,
   },
-  upperCircle1: {
+  upperCircleSmall: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    backgroundColor: '#9edba5',
+    borderRadius: 60,
+    top: -20,
+    right: 30,
+    zIndex: -1,
+  },
+  lowerCircleLarge: {
     position: 'absolute',
     width: 200,
     height: 200,
-    backgroundColor: '#a1e89c',
-    borderRadius: 150,
-    top: -100,
-    right: 155,
-    zIndex: -1,
-  },
-  lowerCircle1: {
-    position: 'absolute',
-    width: 50,
-    height: 50,
-    backgroundColor: '#57cc72',
-    borderRadius: 75,
-    bottom: 90,
-    left: 70,
-    zIndex: -1,
-  },
-  lowerCircle2: {
-    position: 'absolute',
-    width: 150,
-    height: 150,
-    backgroundColor: '#57cc72',
-    borderRadius: 75,
-    bottom: -50,
+    backgroundColor: '#d0f1db',
+    borderRadius: 100,
+    bottom: -100,
     left: -50,
+    zIndex: -2,
+  },
+  lowerCircleSmall: {
+    position: 'absolute',
+    width: 80,
+    height: 80,
+    backgroundColor: '#9edba5',
+    borderRadius: 40,
+    bottom: 20,
+    left: 40,
     zIndex: -1,
   },
-  // scrollContent: {paddingBottom: 40},
-  // header: {
-  //   flexDirection: 'row',
-  //   alignItems: 'center',
-  //   padding: 16,
-  //   backgroundColor: '#a1e89c',
-  //   borderBottomLeftRadius: 80,
-  //   borderBottomRightRadius: 80,
-  //   marginTop: 100,
-  // },
-  // headerText: {fontSize: 24, fontWeight: 'bold', color: '#000'},
   innerContainer: {
-    // flex: 1,
-    justifyContent: 'center',
-    borderRadius: 12,
-    top: 100,
-    height: 500,
-    // opacity: 0.78,
-    alignItems: 'center',
-    padding: 20,
-    backgroundColor: 'rgba(255, 255, 0, 0.3)',
-    zIndex: 0,
+    marginTop: 180,
+    marginHorizontal: 20,
+    padding: 24,
+    borderRadius: 16,
+    backgroundColor: '#ffffff',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 12,
+    elevation: 4,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#333',
     marginBottom: 20,
-    color: '#ff6600',
+    textAlign: 'center',
   },
   input: {
     width: '100%',
     borderWidth: 1,
-    borderColor: '#ccc',
-    padding: 10,
-    marginVertical: 10,
-    borderRadius: 5,
-    color: '#000000',
-  },
-  button1: {
-    backgroundColor: 'rgba(255, 102, 0, 1)', // Orange color
-    paddingVertical: 10,
-    paddingHorizontal: 20,
-    borderRadius: 6,
-    elevation: 3,
-    marginBottom: 16, // For shadow on Android
-  },
-  buttonText1: {
-    color: '#fff', // White text
+    borderColor: '#ddd',
+    padding: 14,
+    borderRadius: 8,
+    marginBottom: 20,
+    color: '#333',
+    backgroundColor: '#f9f9f9',
     fontSize: 16,
-    fontWeight: 'boold',
-    textAlign: 'center',
+  },
+  button: {
+    backgroundColor: '#57cc72',
+    paddingVertical: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  buttonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
 

@@ -1,5 +1,4 @@
-/* eslint-disable prettier/prettier */
-import React, {useState, useEffect} from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -7,14 +6,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialIcons';
 import axios from 'axios';
-
-// import { useRoute } from '@react-navigation/native'; // To access params passed during navigation
 import Config from 'react-native-config';
 
 const FieldDetailsScreen = () => {
-  //   const route = useRoute();
-  //   const { fieldId } = route.params; // Get the fieldId from route params
   const [fieldData, setFieldData] = useState(null);
   const [relatedData, setRelatedData] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -23,8 +19,7 @@ const FieldDetailsScreen = () => {
     const fetchFieldData = async () => {
       try {
         const response = await axios.get(`${Config.BASE_URL}/field/daily/data`);
-        // console.log(response.data);
-        const {Dailydata} = response.data;
+        const { Dailydata } = response.data;
         setFieldData(Dailydata[0]);
       } catch (error) {
         console.error('Error fetching field data', error);
@@ -33,10 +28,8 @@ const FieldDetailsScreen = () => {
     fetchFieldData();
   }, []);
 
-  // Function to fetch related data when the button is clicked
   const handleFetchRelatedData = async () => {
     setIsLoading(true);
-    console.log(Math.random() * 160 + 1);
     try {
       const response = await axios.post(`${Config.MODEL_URL}/predict/crop`, {
         nitrogen: fieldData.nitrogen || Math.random() * 160 + 1,
@@ -48,49 +41,59 @@ const FieldDetailsScreen = () => {
         moisture: fieldData.moisture || Math.random() * 1000 + 1,
       });
       setRelatedData(response.data.predicted_crop);
-      setIsLoading(false);
-      console.log(response.data.predicted_crop);
     } catch (error) {
       console.error('Error fetching related data', error);
+    } finally {
+      setIsLoading(false);
     }
   };
-  // console.log(fieldData);
 
   return (
     <View style={styles.container}>
-      {fieldData ? (
-        <View style={styles.innerContainer}>
-          <Text style={styles.heading}>Field Data</Text>
-          <Text style={styles.textColor}>ID: {fieldData._id}</Text>
-          <Text style={styles.textColor}>Date: {fieldData.date}</Text>
-          <Text style={styles.textColor}>
-            Temperature: {fieldData.temperature}°C
-          </Text>
-          <Text style={styles.textColor}>Humidity: {fieldData.humidity}%</Text>
-          <Text style={styles.textColor}>Moisture: {fieldData.moisture}</Text>
-
-          {isLoading ? (
-            <View
-              style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-              <ActivityIndicator size="large" color="#ff6600" />
+      <View style={styles.card}>
+        {fieldData ? (
+          <>
+            <Text style={styles.heading}>Field Details</Text>
+            <View style={styles.fieldInfo}>
+              <Icon name="calendar-today" size={20} color="#555" />
+              <Text style={styles.text}>Date: {fieldData.date}</Text>
             </View>
-          ) : (relatedData &&
-            <View style={styles.relatedDataContainer}>
-              <Text style={styles.textColor}>
-                Predicted Crop: {relatedData}
+            <View style={styles.fieldInfo}>
+              <Icon name="thermostat" size={20} color="#555" />
+              <Text style={styles.text}>
+                Temperature: {fieldData.temperature}°C
               </Text>
             </View>
-          )}
-          <TouchableOpacity
-            style={styles.fetchButton}
-            onPress={handleFetchRelatedData} // Replace with your function
-          >
-            <Text style={styles.buttonText}>Predict Crop</Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <Text>Loading field data...</Text>
-      )}
+            <View style={styles.fieldInfo}>
+              <Icon name="water-drop" size={20} color="#555" />
+              <Text style={styles.text}>Humidity: {fieldData.humidity}%</Text>
+            </View>
+            <View style={styles.fieldInfo}>
+              <Icon name="waves" size={20} color="#555" />
+              <Text style={styles.text}>Moisture: {fieldData.moisture}</Text>
+            </View>
+
+            {isLoading ? (
+              <ActivityIndicator size="large" color="#ff6600" />
+            ) : (
+              relatedData && (
+                <View style={styles.relatedData}>
+                  <Text style={styles.text}>Predicted Crop: {relatedData}</Text>
+                </View>
+              )
+            )}
+
+            <TouchableOpacity
+              style={styles.button}
+              onPress={handleFetchRelatedData}
+            >
+              <Text style={styles.buttonText}>Predict Crop</Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <Text style={styles.loadingText}>Loading field data...</Text>
+        )}
+      </View>
     </View>
   );
 };
@@ -98,58 +101,60 @@ const FieldDetailsScreen = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5', // Light background
+    backgroundColor: '#eef2f3', // Light background with a modern look
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
   },
-  innerContainer: {
-    backgroundColor: '#ffffff', // Card-like container
-    borderRadius: 12,
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 16,
     padding: 20,
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 4},
     shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5,
+    shadowOffset: { width: 0, height: 4 },
+    shadowRadius: 8,
+    elevation: 8,
     width: '90%',
   },
   heading: {
     fontSize: 24,
     fontWeight: 'bold',
     color: '#333',
-    marginBottom: 10,
     textAlign: 'center',
+    marginBottom: 20,
   },
-  textColor: {
+  fieldInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  text: {
     fontSize: 16,
     color: '#555',
-    marginBottom: 8,
+    marginLeft: 10,
   },
-  relatedDataContainer: {
-    marginTop: 15,
-    marginBottom: 15,
-    padding: 10,
-    backgroundColor: '#f0f8ff', // Light blue background for related data
+  relatedData: {
+    marginTop: 20,
+    backgroundColor: '#e0f7fa',
     borderRadius: 8,
+    padding: 10,
   },
-  fetchButton: {
-    marginTop: 15,
-    backgroundColor: '#ff6600', // Bright orange for button
-    paddingVertical: 15, // Vertical padding for height
-    paddingHorizontal: 30, // Horizontal padding for width
-    borderRadius: 8, // Rounded corners
-    alignItems: 'center', // Center the text
-    justifyContent: 'center', // Vertically align the text
-    shadowColor: '#000', // Optional shadow for depth
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 5, // Android shadow
+  button: {
+    backgroundColor: '#ff6600',
+    paddingVertical: 15,
+    borderRadius: 8,
+    marginTop: 20,
+    alignItems: 'center',
   },
   buttonText: {
-    color: '#fff', // White text for visibility
+    color: '#fff',
     fontWeight: 'bold',
-    fontSize: 16, // Adjust font size
+    fontSize: 16,
+  },
+  loadingText: {
+    color: '#555',
+    fontSize: 18,
   },
 });
 
